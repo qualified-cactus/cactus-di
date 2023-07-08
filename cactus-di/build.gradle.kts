@@ -30,18 +30,17 @@ dependencies {
 
 }
 
+tasks.named<Test>("test") {
+    // Use JUnit Platform for unit tests.
+    useJUnitPlatform()
+}
+
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
-
-tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
-}
-
 
 tasks.register<Jar>("dokkaHtmlJar") {
     dependsOn(tasks.dokkaHtml)
@@ -55,27 +54,13 @@ tasks.register<Jar>("dokkaJavadocJar") {
     archiveClassifier.set("javadoc")
 }
 
+
 tasks.withType<DokkaTask>().configureEach {
     dokkaSourceSets {
         configureEach {
             documentedVisibilities.set(setOf(Visibility.PUBLIC))
         }
     }
-}
-
-artifacts {
-    add("archives", tasks["dokkaJavadocJar"])
-    add("archives", tasks["kotlinSourcesJar"])
-}
-
-tasks.register("check-artifacts") {
-    configurations["archives"].artifacts.forEach {
-        println("- ${it.file.name}")
-    }
-}
-
-signing {
-    sign(configurations["archives"])
 }
 
 publishing {
@@ -94,8 +79,11 @@ publishing {
     }
 
     publications {
-        create<MavenPublication>("maven-central") {
+
+        create<MavenPublication>("mavenCentral") {
             from(components["java"])
+            artifact(tasks["dokkaJavadocJar"])
+            artifact(tasks["kotlinSourcesJar"])
 
             pom {
                 name.set("${project.group}:${project.name}")
@@ -109,8 +97,11 @@ publishing {
                 }
 
                 licenses {
-                    name.set("Apache License Version 2.0")
-                    url.set("http://www.apache.org/licenses/LICENSE-2.0")
+                    license {
+                        name.set("Apache License Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0")
+                    }
+
                 }
 
                 developers {
@@ -123,3 +114,8 @@ publishing {
         }
     }
 }
+
+signing {
+    sign(publishing.publications["mavenCentral"])
+}
+

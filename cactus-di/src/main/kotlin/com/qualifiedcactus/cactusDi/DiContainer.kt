@@ -23,12 +23,12 @@ import kotlin.reflect.KVisibility
 import kotlin.reflect.full.hasAnnotation
 
 /**
- * To use a container, register dependencies then call [getDependency] / [startRunnables].
+ * To use a container, register dependencies then call [get] / [startRunnables].
  *
  * A dependency can be of 3 types:
  * - Instance: an object initialized outside this container. Can be registered using [registerInstance]
  * - Singleton: A class with only 1 lazily initialized instance (thread-safe). Can be registered using [registerSingleton]
- * - Scoped: A class whose new instance is created for each singleton or [getDependency] call. Can be registered using [registerScoped]
+ * - Scoped: A class whose new instance is created for each singleton or [get] call. Can be registered using [registerScoped]
  *
  * Classes (can use registered dependencies) or instances implementing [Runnable] can be registered via [registerRunnable] or [registerRunnableInstance].
  * They can be started in REGISTRATION ORDER using [startRunnables].
@@ -42,12 +42,12 @@ import kotlin.reflect.full.hasAnnotation
  *
  * Singleton and instance dependencies that implement [AutoCloseable] can be closed in registration order using [closeDependencies].
  *
- * Calling [startRunnables] or [getDependency] will lock this container, preventing new dependency to be registered.
+ * Calling [startRunnables] or [get] will lock this container, preventing new dependency to be registered.
  *
  * Circular dependency will cause [StackOverflowError].
  *
  * ## Thread safety
- * The only thread-safe method of this class is [getDependency]
+ * The only thread-safe method of this class is [get]
  *
  */
 class DiContainer : AutoCloseable {
@@ -162,9 +162,10 @@ class DiContainer : AutoCloseable {
     }
 
     /**
+     * Get an instance of a registered dependency in this container.
      * @throws DependencyNotFoundException
      */
-    fun <T:Any> getDependency(clazz: Class<T>): T {
+    operator fun <T:Any> get(clazz: Class<T>): T {
         if (!locked) locked = true
         val dependency = dependencies[clazz.kotlin] ?: throw DependencyNotFoundException(clazz.kotlin)
         return dependency.createInstance() as T

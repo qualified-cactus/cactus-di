@@ -1,19 +1,31 @@
 # Cactus-DI - A simple dependency injection container
 
+This is a light-weight Java dependency injection library written in Kotlin.
+Instance, singleton and scoped dependency types are supported.
+This is an alternative to existing annotation-based dependency injection frameworks.
 
-This is Java library that provides a class `com.qualifiedcactus.cactusDi.DiContainer` that manage dependency-injected objects.
-Instance, singleton and scoped dependency types is supported.
-This library is an alternative to existing annotation-based dependency injection frameworks.
-
-## Install from dependency maven central
+## Maven central
 
 ```xml
-
+<dependency>
+    <groupId>com.qualifiedcactus</groupId>
+    <artifactId>cactus-di</artifactId>
+    <version>0.0.1</version>
+</dependency>
 ```
 
 ## How to use
 
-Create classes, register them and then call `DiContainer.getDependency()`.
+To create a container, follow these steps:
+
+- Write your classes and its dependencies (please no circular dependency).
+- Initialize `com.qualifiedcactus.cactusDi.DiContainer`.
+- Register your classes and instances using methods provided by `DiContainer`
+- (Optional) Register a runnable class that be dependency injected, or a runnble instance
+- Now you can use `DiContainer.startRunnables()` and `DiContainer.getDependency()`
+- (Optional) If your dependencies implement `Autoclosble`, you can close them using `DiContainer.close()` 
+
+Below is a simple example:
 
 ```kotlin
 // create dependencies
@@ -21,23 +33,31 @@ class DependencyA  {
     // ...
 }
 
+class DependencyC {
+    // ...
+}
+
 class DependencyB(
-    val dependencyA: DependencyA // dependency injected via constructor
+    val dependencyA: DependencyA, // dependency injected via constructor
+    val dependencyC: DependencyC,
 ) {
     // ...
 }
 
 
+
 fun main() {
+    val instanceOfDependencyC = DependencyC()
     // create a container
     val container = DiContainer()
     
     // register dependencies
-    container.registerSingleton(DependencyA::class.java)
+    container.registerInstance(instanceOfDependencyC)
+    container.registerScoped(DependencyA::class.java)
     container.registerSingleton(DependencyB::class.java)
     
     // get dependency
-    val dependencyB = container.getDependency(DependencyB::class.java) 
+    val dependencyB = container[DependencyB::class.java]
 }
 ```
 
@@ -58,4 +78,4 @@ diContainer.registerInstance(
 
 ## License
 
-Apache License 2.0. See [NOTICE](NOTICE) and [LICENSE](LICENSE) for more information.
+Apache License Version 2.0. See [NOTICE](NOTICE) and [LICENSE](LICENSE) for more information.

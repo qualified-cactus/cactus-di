@@ -16,7 +16,6 @@
 
 package com.qualifiedcactus.cactusDi
 
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.Assertions.*
@@ -60,8 +59,8 @@ class DiContainerTest {
             registerRunnable(RunnableA::class.java)
         }
         diContainer.startRunnables()
-        assertEquals(1, diContainer.getDependency(DependencyA::class.java).state)
-        assertEquals(0, diContainer.getDependency(DependencyC::class.java).state)
+        assertEquals(1, diContainer[DependencyA::class.java].state)
+        assertEquals(0, diContainer[DependencyC::class.java].state)
     }
 
     @Test
@@ -69,7 +68,7 @@ class DiContainerTest {
         val diContainer = DiContainer().apply {
             registerSingleton(DependencyA::class.java)
         }
-        diContainer.getDependency(DependencyA::class.java)
+        diContainer[DependencyA::class.java]
         assertThrowsExactly(ContainerLockedException::class.java) {
             diContainer.registerSingleton(DependencyB::class.java)
         }
@@ -87,6 +86,6 @@ class DiContainerTest {
             registerSingleton(CirclicDependencyA::class.java)
             registerSingleton(CirclicDependencyB::class.java)
         }
-        diContainer.getDependency(CirclicDependencyA::class.java)
+        diContainer[CirclicDependencyA::class.java]
     }
 }
