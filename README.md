@@ -44,8 +44,6 @@ class DependencyB(
     // ...
 }
 
-
-
 fun main() {
     val instanceOfDependencyC = DependencyC()
     // create a container
